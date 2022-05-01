@@ -1,0 +1,91 @@
+version: '3.7'
+services:  
+
+  rabbitmq-service:
+    image: rabbitmq:3.9.16-management
+    container_name: rabbitmq-service-new
+    ports:
+      - "19672:15672"
+      - "5972:5672"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    volumes:
+      - rabbitmq-vol-new:/var/lib/rabbitmq
+    environment:
+      TZ: "America/Lima"
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+
+  cassandra-service:
+    image: cassandra:3.11.12
+    container_name: cassandra-service-new
+    ports:
+      - "9942:9042"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    volumes:
+      - cassandra-vol-new:/var/lib/cassandra
+    environment:
+      TZ: "America/Lima"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          # for development or testing: 4 cpu min server host, for production: 8 cpu min server host
+          cpus: '0.50'
+          # for development or testing min value: 4096M (4G), for production min value: 6144M (6G), recomended value: 8192M (8G)
+          memory: 4096M
+
+  zipkin-service:
+    image: openzipkin/zipkin:2.23.16
+    container_name: zipkin-service-new
+    ports:
+      - "9911:9411"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    environment:
+      TZ: "America/Lima"
+      RABBIT_ADDRESSES: rabbitmq-service-new:5672
+      ## for development or testing: 2, for production: 4 or above
+      RABBIT_CONCURRENCY: 2      
+      ## Para storage con cassandra, establecer memory: 1024M
+      STORAGE_TYPE: cassandra3
+      CASSANDRA_ENSURE_SCHEMA: 'true'
+      CASSANDRA_CONTACT_POINTS: cassandra-service-new:9042
+    ## Solo para desarrollo en DEBUG, en produccion poner en INFO
+    command: --logging.level.zipkin2=DEBUG
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+
+networks:
+  salesforce-spring-network:
+    external: true
+
+volumes:
+  rabbitmq-vol-new:
+  cassandra-vol-new:
