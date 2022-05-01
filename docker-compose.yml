@@ -69,6 +69,7 @@ services:
       STORAGE_TYPE: cassandra3
       CASSANDRA_ENSURE_SCHEMA: 'true'
       CASSANDRA_CONTACT_POINTS: cassandra-service-new:9042
+      CASSANDRA_MAX_CONNECTIONS: 4
     ## Solo para desarrollo en DEBUG, en produccion poner en INFO
     command: --logging.level.zipkin2=DEBUG
     logging:
