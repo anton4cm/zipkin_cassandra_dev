@@ -11,11 +11,11 @@ services:
     networks:
       - salesforce-spring-network
     volumes:
-      - rabbitmq-vol-new:/var/lib/rabbitmq
+      - rabbitmq_vol_new:/var/lib/rabbitmq
     environment:
       TZ: "America/Lima"
       RABBITMQ_DEFAULT_USER: 'guest'
-      RABBITMQ_DEFAULT_PASS: 'guest'
+      RABBITMQ_DEFAULT_PASS: '12345678'
     logging:
       driver: "json-file"
       options:
@@ -27,8 +27,35 @@ services:
           cpus: '0.50'
           memory: 1024M
 
+## https://hub.docker.com/_/cassandra
+  # cassandra-service:
+  #   image: cassandra:3.11.12
+  #   container_name: cassandra-service-new
+  #   ports:
+  #     - "9942:9042"
+  #   restart: unless-stopped
+  #   networks:
+  #     - salesforce-spring-network
+  #   volumes:
+  #     - cassandra_vol_new:/var/lib/cassandra
+  #   environment:
+  #     TZ: "America/Lima"
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "20"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         # for development or testing: 4 cpu min server host, for production: 8 cpu min server host
+  #         cpus: '0.50'
+  #         # for development or testing min value: 4096M (4G), for production min value: 6144M (6G), recomended value: 8192M (8G)
+  #         memory: 4096M
+
+## https://hub.docker.com/r/bitnami/cassandra
   cassandra-service:
-    image: cassandra:3.11.12
+    image: bitnami/cassandra:3.11.12
     container_name: cassandra-service-new
     ports:
       - "9942:9042"
@@ -36,9 +63,12 @@ services:
     networks:
       - salesforce-spring-network
     volumes:
-      - cassandra-vol-new:/var/lib/cassandra
+      - cassandra_vol_new:/bitnami
     environment:
       TZ: "America/Lima"
+      CASSANDRA_USER: "cassandra"
+      CASSANDRA_PASSWORD: "12345678"
+      CASSANDRA_PASSWORD_SEEDER: "yes"
     logging:
       driver: "json-file"
       options:
@@ -62,13 +92,19 @@ services:
       - salesforce-spring-network
     environment:
       TZ: "America/Lima"
+      ## RABBIT, for development or testing RABBIT_CONCURRENCY: 2, for production RABBIT_CONCURRENCY: 4 or above
       RABBIT_ADDRESSES: rabbitmq-service-new:5672
-      ## for development or testing: 2, for production: 4 or above
+      RABBIT_QUEUE: 'zipkin'
+      RABBIT_USER: 'guest'
+      RABBIT_PASSWORD: '12345678'
+      RABBIT_VIRTUAL_HOST: '/'
       RABBIT_CONCURRENCY: 2      
-      ## Para storage con cassandra, establecer memory: 1024M
+      ## CASSANDRA, Para storage con cassandra, establecer memory: 1024M
       STORAGE_TYPE: cassandra3
-      CASSANDRA_ENSURE_SCHEMA: 'true'
       CASSANDRA_CONTACT_POINTS: cassandra-service-new:9042
+      CASSANDRA_ENSURE_SCHEMA: 'true'
+      CASSANDRA_USERNAME: "cassandra"
+      CASSANDRA_PASSWORD: "12345678"
       CASSANDRA_MAX_CONNECTIONS: 4
     ## Solo para desarrollo en DEBUG, en produccion poner en INFO
     command: --logging.level.zipkin2=DEBUG
@@ -88,5 +124,5 @@ networks:
     external: true
 
 volumes:
-  rabbitmq-vol-new:
-  cassandra-vol-new:
+  rabbitmq_vol_new:
+  cassandra_vol_new:

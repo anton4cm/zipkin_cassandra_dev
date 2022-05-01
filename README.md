@@ -60,15 +60,24 @@ docker network create salesforce-spring-network
 ```sh
 cd /DATA/TRACING_NEW/
 
+# Check config and status
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new config
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new ps
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new top
 
+# Destroy all
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new down
-docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs zipkin-service
-docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs rabbitmq-service
-docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs cassandra-service
 
+# Destroy per service
+docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs zipkin-service
+docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs cassandra-service
+docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new rm -fs rabbitmq-service
+
+# Remove volumes
+docker volume rm salesforce_tracing_new_cassandra_vol_new
+docker volume rm salesforce_tracing_new_rabbitmq_vol_new
+
+# Up
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new up -d --build rabbitmq-service
 docker logs -f rabbitmq-service-new
 
@@ -78,6 +87,7 @@ docker logs -f cassandra-service-new
 docker-compose --compatibility -f /DATA/TRACING_NEW/docker-compose.yml -p salesforce_tracing_new up -d --build zipkin-service
 docker logs -f zipkin-service-new
 
+# Logs
 docker logs -f --tail 100 rabbitmq-service-new
 docker logs -f --tail 100 cassandra-service-new
 docker logs -f --tail 100 zipkin-service-new
