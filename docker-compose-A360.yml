@@ -1,0 +1,101 @@
+version: '3.7'
+services:  
+
+  rabbitmq-service:
+    image: rabbitmq:3.9.16-management
+    container_name: rabbitmq-service
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    volumes:
+      - rabbitmq-vol:/var/lib/rabbitmq
+    environment:
+      TZ: "America/Lima"
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+
+  cassandra-service:
+    image: bitnami/cassandra:3.11.12
+    container_name: cassandra-service
+    ports:
+      - "9042:9042"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    volumes:
+      - cassandra-vol:/bitnami
+    environment:
+      TZ: "America/Lima"
+      CASSANDRA_USER: "cassandra"
+      CASSANDRA_PASSWORD: "12345678"
+      CASSANDRA_PASSWORD_SEEDER: "yes"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          # for development or testing: 4 cpu min server host, for production: 8 cpu min server host
+          cpus: '0.50'
+          # for development or testing min value: 4096M (4G), for production min value: 6144M (6G), recomended value: 8192M (8G)
+          memory: 4096M
+
+  zipkin-service:
+    image: openzipkin/zipkin:2.23.16
+    container_name: zipkin-service
+    ports:
+      - "9411:9411"
+    restart: unless-stopped
+    networks:
+      - salesforce-spring-network
+    environment:
+      TZ: "America/Lima"
+      ## RABBIT, for development or testing RABBIT_CONCURRENCY: 2, for production RABBIT_CONCURRENCY: 4 or above
+      RABBIT_ADDRESSES: rabbitmq-service:5672
+      RABBIT_QUEUE: 'zipkin'
+      RABBIT_USER: 'guest'
+      RABBIT_PASSWORD: 'guest'
+      RABBIT_VIRTUAL_HOST: '/'
+      RABBIT_CONCURRENCY: 2      
+      ## CASSANDRA, Para storage con cassandra, establecer memory: 1024M
+      STORAGE_TYPE: cassandra3
+      CASSANDRA_CONTACT_POINTS: cassandra-service:9042
+      CASSANDRA_ENSURE_SCHEMA: 'true'
+      CASSANDRA_USERNAME: "cassandra"
+      CASSANDRA_PASSWORD: "12345678"
+      CASSANDRA_MAX_CONNECTIONS: 4
+    ## Solo para desarrollo en DEBUG, en produccion poner en INFO
+    command: --logging.level.zipkin2=DEBUG
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "20"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+
+networks:
+  salesforce-spring-network:
+    external: true
+
+volumes:
+  rabbitmq-vol:
+  cassandra-vol:
