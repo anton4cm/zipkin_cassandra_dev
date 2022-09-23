@@ -2,7 +2,7 @@ version: '3.7'
 services:  
 
   rabbitmq-service:
-    image: rabbitmq:3.9.16-management
+    image: rabbitmq:3.9.22-management
     container_name: rabbitmq-service
     ports:
       - "15672:15672"
@@ -28,7 +28,7 @@ services:
           memory: 1024M
 
   cassandra-service:
-    image: bitnami/cassandra:3.11.12
+    image: bitnami/cassandra:3.11.13
     container_name: cassandra-service
     ports:
       - "9042:9042"
@@ -50,13 +50,11 @@ services:
     deploy:
       resources:
         limits:
-          # for development or testing: 4 cpu min server host, for production: 8 cpu min server host
           cpus: '0.50'
-          # for development or testing min value: 4096M (4G), for production min value: 6144M (6G), recomended value: 8192M (8G)
           memory: 4096M
 
   zipkin-service:
-    image: openzipkin/zipkin:2.23.16
+    image: openzipkin/zipkin:2.23.18
     container_name: zipkin-service
     ports:
       - "9411:9411"
@@ -71,15 +69,15 @@ services:
       RABBIT_USER: 'guest'
       RABBIT_PASSWORD: 'guest'
       RABBIT_VIRTUAL_HOST: '/'
-      RABBIT_CONCURRENCY: 2      
-      ## CASSANDRA, Para storage con cassandra, establecer memory: 1024M
+      RABBIT_CONCURRENCY: 2
+      ## CASSANDRA, for development or testing CASSANDRA_MAX_CONNECTIONS: 4, for production CASSANDRA_MAX_CONNECTIONS: 8 or above
       STORAGE_TYPE: cassandra3
       CASSANDRA_CONTACT_POINTS: cassandra-service:9042
       CASSANDRA_ENSURE_SCHEMA: 'true'
       CASSANDRA_USERNAME: "cassandra"
       CASSANDRA_PASSWORD: "12345678"
       CASSANDRA_MAX_CONNECTIONS: 4
-    ## Solo para desarrollo en DEBUG, en produccion poner en INFO
+    ## for development or testing DEBUG, for production INFO
     command: --logging.level.zipkin2=DEBUG
     logging:
       driver: "json-file"
