@@ -2,7 +2,7 @@ version: '3.7'
 services:  
 
   rabbitmq-service:
-    image: rabbitmq:3.9.22-management
+    image: rabbitmq:3.12.10-management
     container_name: rabbitmq-service-new
     ports:
       - "19672:15672"
@@ -55,7 +55,7 @@ services:
 
 ## https://hub.docker.com/r/bitnami/cassandra
   cassandra-service:
-    image: bitnami/cassandra:3.11.13
+    image: bitnami/cassandra:4.1.3
     container_name: cassandra-service-new
     ports:
       - "9942:9042"
@@ -83,7 +83,7 @@ services:
           memory: 4096M
 
   zipkin-service:
-    image: openzipkin/zipkin:2.23.18
+    image: openzipkin/zipkin:2.24.3
     container_name: zipkin-service-new
     ports:
       - "9911:9411"
