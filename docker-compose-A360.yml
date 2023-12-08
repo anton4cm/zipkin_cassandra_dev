@@ -28,7 +28,7 @@ services:
           memory: 1024M
 
   cassandra-service:
-    image: bitnami/cassandra:4.1.3
+    image: bitnami/cassandra:3.11.13
     container_name: cassandra-service
     ports:
       - "9042:9042"
@@ -54,7 +54,7 @@ services:
           memory: 4096M
 
   zipkin-service:
-    image: openzipkin/zipkin:2.24.3
+    image: openzipkin/zipkin:2.24.4
     container_name: zipkin-service
     ports:
       - "9411:9411"
