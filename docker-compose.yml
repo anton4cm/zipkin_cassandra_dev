@@ -54,6 +54,7 @@ services:
   #         memory: 4096M
 
 ## https://hub.docker.com/r/bitnami/cassandra
+## openzipkin/zipkin no funciona con version de cassandra 4 (ultima testeada bitnami/cassandra:4.1.3), solo con version 3
   cassandra-service:
     image: bitnami/cassandra:3.11.13
     container_name: cassandra-service-new
